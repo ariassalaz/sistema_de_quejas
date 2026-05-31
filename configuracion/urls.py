@@ -9,4 +9,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', TemplateView.as_view(template_name='home.html'), name='inicio'),
     path('cuentas/', include('accounts.urls')),
+    path('quejas/', include('quejas.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

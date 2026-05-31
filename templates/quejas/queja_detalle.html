@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load quejas_extras %}
+
+{% block titulo %}{{ queja.titulo }}{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-lg-8">
+
+    <div class="mb-3">
+      <a href="{% url 'queja-lista' %}" class="text-decoration-none text-muted">
+        <i class="bi bi-arrow-left me-1"></i>Volver a la lista
+      </a>
+    </div>
+
+    <div class="card border-0 shadow-sm">
+      <div class="card-body p-4">
+        <div class="d-flex justify-content-between align-items-start mb-3">
+          <div>
+            <span class="badge bg-secondary me-1">{{ queja.get_tipo_display }}</span>
+            <span class="badge bg-{{ queja.estado|color_estado }}">{{ queja.get_estado_display }}</span>
+          </div>
+          <div class="text-center">
+            <div class="fs-4 fw-bold text-primary">{{ queja.total_votos }}</div>
+            <small class="text-muted">votos</small>
+          </div>
+        </div>
+
+        <h2 class="card-title">{{ queja.titulo }}</h2>
+
+        <div class="text-muted small mb-3">
+          <i class="bi bi-building me-1"></i>{{ queja.departamento }}
+          &nbsp;·&nbsp;
+          <i class="bi bi-clock me-1"></i>{{ queja.fecha_creacion|date:"d/m/Y H:i" }}
+          {% if not queja.anonima and queja.autor %}
+            &nbsp;·&nbsp;<i class="bi bi-person me-1"></i>{{ queja.autor }}
+          {% else %}
+            &nbsp;·&nbsp;<i class="bi bi-incognito me-1"></i>Anónima
+          {% endif %}
+        </div>
+
+        <hr>
+        <p class="card-text" style="white-space: pre-line;">{{ queja.descripcion }}</p>
+
+        {% if queja.imagen %}
+        <div class="mt-3">
+          <img src="{{ queja.imagen.url }}" alt="Imagen adjunta" class="img-fluid rounded" style="max-height: 400px;">
+        </div>
+        {% endif %}
+
+        <hr>
+
+        <div class="d-flex align-items-center gap-3 flex-wrap">
+          <form method="post" action="{% url 'queja-votar' queja.pk %}">
+            {% csrf_token %}
+            {% if usuario_voto %}
+              <button type="submit" class="btn btn-primary">
+                <i class="bi bi-hand-thumbs-up-fill me-1"></i>Quitar voto ({{ queja.total_votos }})
+              </button>
+            {% else %}
+              <button type="submit" class="btn btn-outline-primary">
+                <i class="bi bi-hand-thumbs-up me-1"></i>Votar ({{ queja.total_votos }})
+              </button>
+            {% endif %}
+          </form>
+
+          {% if request.user.is_staff or queja.autor == request.user %}
+          <a href="{% url 'queja-editar' queja.pk %}" class="btn btn-outline-secondary">
+            <i class="bi bi-pencil me-1"></i>Editar
+          </a>
+          <a href="{% url 'queja-eliminar' queja.pk %}" class="btn btn-outline-danger">
+            <i class="bi bi-trash me-1"></i>Eliminar
+          </a>
+          {% endif %}
+
+          {% if request.user.is_staff %}
+          <a href="{% url 'queja-cambiar-estado' queja.pk %}" class="btn btn-outline-warning">
+            <i class="bi bi-arrow-repeat me-1"></i>Cambiar estado
+          </a>
+          {% endif %}
+        </div>
+
+        <div class="text-muted small mt-3">
+          Última actualización: {{ queja.fecha_actualizacion|date:"d/m/Y H:i" }}
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
