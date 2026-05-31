@@ -91,7 +91,13 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.smtp.EmailBackend')
+EMAIL_HOST = config('SMTP_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('SMTP_PORT', default=587, cast=int)
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = config('SMTP_USER', default='')
+EMAIL_HOST_PASSWORD = config('SMTP_PASS', default='')
+DEFAULT_FROM_EMAIL = config('SMTP_FROM', default='')
 
 LOGIN_URL = 'iniciar-sesion'
 LOGIN_REDIRECT_URL = 'inicio'
