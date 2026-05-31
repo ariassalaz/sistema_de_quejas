@@ -19,12 +19,10 @@ class VistaListaQuejas(LoginRequiredMixin, ListView):
     paginate_by = 10
 
     def get_queryset(self):
-        if self.request.user.is_staff:
-            consulta = Queja.objects.select_related('autor', 'departamento').all()
-        else:
-            consulta = Queja.objects.select_related('autor', 'departamento').filter(
-                autor=self.request.user
-            )
+        # Todos los usuarios autenticados ven todas las quejas
+        # Staff y usuarios regulares ven el mismo listado
+        # La anonimidad se protege en el template (no mostrando el nombre del autor)
+        consulta = Queja.objects.select_related('autor', 'departamento').all()
 
         busqueda = self.request.GET.get('busqueda', '').strip()
         departamento = self.request.GET.get('departamento', '').strip()
