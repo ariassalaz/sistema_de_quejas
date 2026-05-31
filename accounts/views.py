@@ -1,8 +1,9 @@
+from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, UpdateView, DetailView
 
-from .forms import FormularioRegistro
+from .forms import FormularioRegistro, FormularioPerfil
 from .models import CustomUser
 
 
@@ -29,9 +30,13 @@ class VistaPerfil(LoginRequiredMixin, DetailView):
 
 class VistaEditarPerfil(LoginRequiredMixin, UpdateView):
     model = CustomUser
+    form_class = FormularioPerfil
     template_name = 'accounts/editar_perfil.html'
-    fields = ['first_name', 'last_name', 'email', 'bio', 'avatar']
     success_url = reverse_lazy('perfil')
 
     def get_object(self):
         return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Perfil actualizado correctamente.')
+        return super().form_valid(form)

@@ -42,3 +42,27 @@ class FormularioRegistro(UserCreationForm):
         if commit:
             usuario.save()
         return usuario
+
+
+class FormularioPerfil(forms.ModelForm):
+    class Meta:
+        model = CustomUser
+        fields = ['first_name', 'last_name', 'email', 'bio', 'avatar']
+        labels = {
+            'first_name': 'Nombre',
+            'last_name': 'Apellido',
+            'email': 'Correo electrónico',
+            'bio': 'Biografía',
+            'avatar': 'Foto de perfil',
+        }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'last_name': forms.TextInput(attrs={'class': 'form-control'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control'}),
+            'bio': forms.Textarea(attrs={
+                'class': 'form-control',
+                'rows': 3,
+                'placeholder': 'Escribe algo sobre ti...',
+            }),
+            'avatar': forms.ClearableFileInput(attrs={'class': 'form-control'}),
+        }
