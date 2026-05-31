@@ -1,6 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.db.models import Q
+from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
@@ -71,8 +72,10 @@ class VistaCrearQueja(LoginRequiredMixin, CreateView):
         if not queja.anonima:
             queja.autor = self.request.user
         queja.save()
+        form.save_m2m()
+        self.object = queja
         messages.success(self.request, 'Tu queja fue registrada correctamente.')
-        return super().form_valid(form)
+        return HttpResponseRedirect(queja.get_absolute_url())
 
 
 class VistaEditarQueja(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
