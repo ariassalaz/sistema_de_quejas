@@ -1,0 +1,13 @@
+Hola {{ queja.autor.get_full_name|default:queja.autor.username }},
+
+El estado de tu queja ha sido actualizado.
+
+Queja: {{ queja.titulo }}
+Departamento: {{ queja.departamento }}
+Nuevo estado: {{ queja.get_estado_display }}
+
+Puedes consultar el detalle en:
+{{ url_detalle }}
+
+— Sistema de Quejas y Sugerencias
+Instituto Tecnológico de La Laguna

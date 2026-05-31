@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load quejas_extras %}
+
+{% block titulo %}Panel de estadísticas{% endblock %}
+
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2><i class="bi bi-bar-chart-line text-primary me-2"></i>Panel de estadísticas</h2>
+  <span class="badge bg-primary fs-6">{{ total }} quejas en total</span>
+</div>
+
+{# Tarjetas de estado #}
+<div class="row g-3 mb-4">
+  {% for item in por_estado %}
+  <div class="col-6 col-md-3">
+    <div class="card border-0 shadow-sm text-center">
+      <div class="card-body">
+        <div class="display-6 fw-bold text-{{ item.color }}">{{ item.total }}</div>
+        <div class="text-muted small mt-1">{{ item.etiqueta }}</div>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="row g-4 mb-4">
+
+  {# Gráfica de estados #}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Distribución por estado</h5>
+        <canvas id="graficaEstados" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# Gráfica por departamento #}
+  <div class="col-md-6">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Quejas por departamento</h5>
+        <canvas id="graficaDepartamentos" height="250"></canvas>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="row g-4">
+
+  {# Tipo: queja vs sugerencia #}
+  <div class="col-md-4">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Tipo</h5>
+        <canvas id="graficaTipo" height="220"></canvas>
+      </div>
+    </div>
+  </div>
+
+  {# Top 5 más votadas #}
+  <div class="col-md-8">
+    <div class="card border-0 shadow-sm h-100">
+      <div class="card-body">
+        <h5 class="card-title mb-3">Top 5 más votadas</h5>
+        {% if mas_votadas %}
+        <div class="table-responsive">
+          <table class="table table-sm align-middle">
+            <thead class="table-light">
+              <tr>
+                <th>#</th>
+                <th>Título</th>
+                <th>Departamento</th>
+                <th>Estado</th>
+                <th class="text-center"><i class="bi bi-hand-thumbs-up"></i></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for queja in mas_votadas %}
+              <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>
+                  <a href="{{ queja.get_absolute_url }}" class="text-decoration-none">
+                    {{ queja.titulo|truncatechars:40 }}
+                  </a>
+                </td>
+                <td>{{ queja.departamento }}</td>
+                <td>
+                  <span class="badge bg-{{ queja.estado|color_estado }}">
+                    {{ queja.get_estado_display }}
+                  </span>
+                </td>
+                <td class="text-center fw-bold text-primary">{{ queja.num_votos }}</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+        {% else %}
+          <p class="text-muted">Aún no hay votos registrados.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts_extra %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+const coloresEstado = ['#ffc107','#0dcaf0','#198754','#dc3545'];
+
+// Gráfica de estados (dona)
+new Chart(document.getElementById('graficaEstados'), {
+  type: 'doughnut',
+  data: {
+    labels: [{% for i in por_estado %}'{{ i.etiqueta }}',{% endfor %}],
+    datasets: [{
+      data: [{% for i in por_estado %}{{ i.total }},{% endfor %}],
+      backgroundColor: coloresEstado,
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+
+// Gráfica por departamento (barras)
+new Chart(document.getElementById('graficaDepartamentos'), {
+  type: 'bar',
+  data: {
+    labels: [{% for d in por_departamento %}'{{ d.nombre }}',{% endfor %}],
+    datasets: [{
+      label: 'Quejas',
+      data: [{% for d in por_departamento %}{{ d.total }},{% endfor %}],
+      backgroundColor: '#0d6efd88',
+      borderColor: '#0d6efd',
+      borderWidth: 1,
+    }]
+  },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
+});
+
+// Gráfica tipo (pastel)
+new Chart(document.getElementById('graficaTipo'), {
+  type: 'pie',
+  data: {
+    labels: [{% for etiqueta, total in por_tipo.items %}'{{ etiqueta }}',{% endfor %}],
+    datasets: [{
+      data: [{% for etiqueta, total in por_tipo.items %}{{ total }},{% endfor %}],
+      backgroundColor: ['#0d6efd','#6f42c1'],
+    }]
+  },
+  options: { plugins: { legend: { position: 'bottom' } } }
+});
+</script>
+{% endblock %}
