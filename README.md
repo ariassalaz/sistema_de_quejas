@@ -4,7 +4,22 @@ Aplicación web desarrollada con Django que permite a los estudiantes registrar 
 
 ## Capturas de pantalla
 
-> _Próximamente: capturas del sistema en producción._
+> Las imágenes están en la carpeta [`docs/capturas/`](docs/capturas/).
+
+### Página de inicio
+![Inicio](docs/capturas/inicio.png)
+
+### Lista de quejas
+![Lista de quejas](docs/capturas/lista_quejas.png)
+
+### Detalle de queja
+![Detalle de queja](docs/capturas/detalle_queja.png)
+
+### Formulario de nueva queja
+![Nueva queja](docs/capturas/nueva_queja.png)
+
+### Panel de administración
+![Admin](docs/capturas/admin.png)
 
 ---
 
@@ -192,17 +207,18 @@ certbot --nginx -d tudominio.com
 
 ---
 
+## URL del sistema en producción
+
+**http://sistema-quejas.duckdns.org**
+
 ## Credenciales de prueba
 
-Después de ejecutar `createsuperuser` y cargar el fixture, puedes crear usuarios desde el panel de administración o mediante el registro público.
+| Rol | Usuario | Contraseña | Acceso |
+|---|---|---|---|
+| **Administrador** | `admin` | `Admin1234!` | `/admin/` y todas las vistas |
+| **Usuario normal** | Registrarse en `/cuentas/registro/` | — | Solo sus propias quejas |
 
-| Rol | Cómo crear |
-|---|---|
-| **Superadmin** | `docker-compose exec web python manage.py createsuperuser` |
-| **Staff** | Desde `/admin/` → Usuarios → marcar "Es staff" |
-| **Alumno** | Registro público en `/cuentas/registro/` |
-
-> Las credenciales específicas las defines tú al crear el superusuario.
+> El administrador puede cambiar el estado de cualquier queja y gestionar departamentos desde `/admin/`.
 
 ---
 
