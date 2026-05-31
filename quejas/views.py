@@ -1,13 +1,15 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
-from django.db.models import Q
+from django.core.mail import send_mail
+from django.db.models import Count, Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect
+from django.template.loader import render_to_string
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView, TemplateView
 
-from .constantes import OPCIONES_ESTADO
+from .constantes import OPCIONES_ESTADO, OPCIONES_TIPO, COLOR_ESTADO
 from .forms import FormularioQueja
 from .models import Departamento, Queja
 
@@ -131,6 +133,72 @@ class VistaCambiarEstado(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         contexto['opciones_estado'] = OPCIONES_ESTADO
         return contexto
 
-    def get_success_url(self):
+    def form_valid(self, form):
+        respuesta = super().form_valid(form)
+        self._enviar_notificacion()
         messages.success(self.request, 'Estado actualizado correctamente.')
+        return respuesta
+
+    def _enviar_notificacion(self):
+        queja = self.object
+        if queja.anonima or not queja.autor or not queja.autor.email:
+            return
+        url_detalle = self.request.build_absolute_uri(queja.get_absolute_url())
+        cuerpo = render_to_string('quejas/emails/cambio_estado.txt', {
+            'queja': queja,
+            'url_detalle': url_detalle,
+        })
+        send_mail(
+            subject=f'Tu queja ha sido actualizada: {queja.get_estado_display()}',
+            message=cuerpo,
+            from_email=None,
+            recipient_list=[queja.autor.email],
+            fail_silently=True,
+        )
+
+    def get_success_url(self):
         return self.object.get_absolute_url()
+
+
+class VistaEstadisticas(LoginRequiredMixin, UserPassesTestMixin, TemplateView):
+    template_name = 'quejas/estadisticas.html'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+
+        total = Queja.objects.count()
+        contexto['total'] = total
+
+        # Quejas por estado
+        por_estado = {valor: 0 for valor, _ in OPCIONES_ESTADO}
+        for item in Queja.objects.values('estado').annotate(total=Count('id')):
+            por_estado[item['estado']] = item['total']
+        contexto['por_estado'] = [
+            {'etiqueta': etiqueta, 'valor': valor, 'total': por_estado[valor], 'color': COLOR_ESTADO[valor]}
+            for valor, etiqueta in OPCIONES_ESTADO
+        ]
+
+        # Quejas por departamento
+        contexto['por_departamento'] = (
+            Departamento.objects
+            .annotate(total=Count('quejas'))
+            .order_by('-total')
+        )
+
+        # Quejas por tipo
+        contexto['por_tipo'] = {
+            etiqueta: Queja.objects.filter(tipo=valor).count()
+            for valor, etiqueta in OPCIONES_TIPO
+        }
+
+        # Top 5 más votadas
+        contexto['mas_votadas'] = (
+            Queja.objects
+            .annotate(num_votos=Count('votos'))
+            .order_by('-num_votos')[:5]
+        )
+
+        return contexto
