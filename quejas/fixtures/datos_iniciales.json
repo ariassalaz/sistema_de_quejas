@@ -1,0 +1,56 @@
+[
+  {
+    "model": "quejas.departamento",
+    "pk": 1,
+    "fields": {
+      "nombre": "Sistemas",
+      "descripcion": "Departamento de Ingeniería en Sistemas Computacionales.",
+      "responsable": null
+    }
+  },
+  {
+    "model": "quejas.departamento",
+    "pk": 2,
+    "fields": {
+      "nombre": "Industrial",
+      "descripcion": "Departamento de Ingeniería Industrial.",
+      "responsable": null
+    }
+  },
+  {
+    "model": "quejas.departamento",
+    "pk": 3,
+    "fields": {
+      "nombre": "Química",
+      "descripcion": "Departamento de Ingeniería Química.",
+      "responsable": null
+    }
+  },
+  {
+    "model": "quejas.departamento",
+    "pk": 4,
+    "fields": {
+      "nombre": "Mecánica",
+      "descripcion": "Departamento de Ingeniería Mecánica.",
+      "responsable": null
+    }
+  },
+  {
+    "model": "quejas.departamento",
+    "pk": 5,
+    "fields": {
+      "nombre": "Mecatrónica",
+      "descripcion": "Departamento de Ingeniería Mecatrónica.",
+      "responsable": null
+    }
+  },
+  {
+    "model": "quejas.departamento",
+    "pk": 6,
+    "fields": {
+      "nombre": "Gestión",
+      "descripcion": "Departamento de Gestión Empresarial.",
+      "responsable": null
+    }
+  }
+]
