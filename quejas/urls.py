@@ -8,4 +8,6 @@ urlpatterns = [
     path('<int:pk>/', views.VistaDetalleQueja.as_view(), name='queja-detalle'),
     path('<int:pk>/editar/', views.VistaEditarQueja.as_view(), name='queja-editar'),
     path('<int:pk>/eliminar/', views.VistaEliminarQueja.as_view(), name='queja-eliminar'),
+    path('<int:pk>/votar/', views.VistaVotarQueja.as_view(), name='queja-votar'),
+    path('<int:pk>/estado/', views.VistaCambiarEstado.as_view(), name='queja-cambiar-estado'),
 ]
