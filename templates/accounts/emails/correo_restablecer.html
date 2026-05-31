@@ -1,0 +1,11 @@
+Hola {{ user.get_full_name|default:user.username }},
+
+Recibimos una solicitud para restablecer la contraseña de tu cuenta.
+
+Para crear una nueva contraseña haz clic en el siguiente enlace (válido por 24 horas):
+
+{{ protocol }}://{{ domain }}{% url 'confirmar-restablecer' uidb64=uid token=token %}
+
+Si no solicitaste este cambio, puedes ignorar este mensaje.
+
+— Sistema de Quejas y Sugerencias

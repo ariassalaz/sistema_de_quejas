@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+
+{% block titulo %}Mi perfil{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-7">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <div class="d-flex align-items-center mb-4">
+          {% if usuario_perfil.avatar %}
+            <img src="{{ usuario_perfil.avatar.url }}" alt="Avatar" class="rounded-circle me-3" width="80" height="80" style="object-fit:cover;">
+          {% else %}
+            <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width:80px;height:80px;font-size:2rem;">
+              {{ usuario_perfil.username|first|upper }}
+            </div>
+          {% endif %}
+          <div>
+            <h3 class="mb-0">{{ usuario_perfil.get_full_name|default:usuario_perfil.username }}</h3>
+            <small class="text-muted">@{{ usuario_perfil.username }}</small>
+          </div>
+        </div>
+        <ul class="list-group list-group-flush mb-4">
+          <li class="list-group-item px-0">
+            <strong>Correo:</strong> {{ usuario_perfil.email|default:"—" }}
+          </li>
+          <li class="list-group-item px-0">
+            <strong>Departamento:</strong> {{ usuario_perfil.departamento_asignado|default:"—" }}
+          </li>
+          <li class="list-group-item px-0">
+            <strong>Biografía:</strong> {{ usuario_perfil.bio|default:"Sin biografía" }}
+          </li>
+        </ul>
+        <div class="d-flex gap-2">
+          <a href="{% url 'editar-perfil' %}" class="btn btn-primary">
+            <i class="bi bi-pencil me-1"></i>Editar perfil
+          </a>
+          <a href="{% url 'cambiar-contrasena' %}" class="btn btn-outline-secondary">
+            <i class="bi bi-key me-1"></i>Cambiar contraseña
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
