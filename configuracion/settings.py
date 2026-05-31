@@ -97,6 +97,10 @@ LOGIN_URL = 'iniciar-sesion'
 LOGIN_REDIRECT_URL = 'inicio'
 LOGOUT_REDIRECT_URL = 'inicio'
 
+# Almacena el token CSRF en la sesión en lugar de una cookie
+# Necesario cuando se despliega detrás de Nginx con IP directa
+CSRF_USE_SESSIONS = True
+
 if not DEBUG:
     SECURE_BROWSER_XSS_FILTER = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
