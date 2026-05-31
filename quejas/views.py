@@ -1,10 +1,14 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.db.models import Q
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
 
+from .constantes import OPCIONES_ESTADO
 from .forms import FormularioQueja
-from .models import Queja
+from .models import Departamento, Queja
 
 
 class VistaListaQuejas(LoginRequiredMixin, ListView):
@@ -15,10 +19,35 @@ class VistaListaQuejas(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         if self.request.user.is_staff:
-            return Queja.objects.select_related('autor', 'departamento').all()
-        return Queja.objects.select_related('autor', 'departamento').filter(
-            autor=self.request.user
-        )
+            consulta = Queja.objects.select_related('autor', 'departamento').all()
+        else:
+            consulta = Queja.objects.select_related('autor', 'departamento').filter(
+                autor=self.request.user
+            )
+
+        busqueda = self.request.GET.get('busqueda', '').strip()
+        departamento = self.request.GET.get('departamento', '').strip()
+        estado = self.request.GET.get('estado', '').strip()
+
+        if busqueda:
+            consulta = consulta.filter(
+                Q(titulo__icontains=busqueda) | Q(descripcion__icontains=busqueda)
+            )
+        if departamento:
+            consulta = consulta.filter(departamento__pk=departamento)
+        if estado:
+            consulta = consulta.filter(estado=estado)
+
+        return consulta
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto['departamentos'] = Departamento.objects.all()
+        contexto['opciones_estado'] = OPCIONES_ESTADO
+        contexto['busqueda'] = self.request.GET.get('busqueda', '')
+        contexto['filtro_departamento'] = self.request.GET.get('departamento', '')
+        contexto['filtro_estado'] = self.request.GET.get('estado', '')
+        return contexto
 
 
 class VistaDetalleQueja(LoginRequiredMixin, DetailView):
@@ -73,3 +102,34 @@ class VistaEliminarQueja(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     def form_valid(self, form):
         messages.success(self.request, 'Queja eliminada.')
         return super().form_valid(form)
+
+
+class VistaVotarQueja(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        queja = get_object_or_404(Queja, pk=pk)
+        if queja.votos.filter(pk=request.user.pk).exists():
+            queja.votos.remove(request.user)
+            messages.info(request, 'Voto retirado.')
+        else:
+            queja.votos.add(request.user)
+            messages.success(request, '¡Voto registrado!')
+        return redirect(queja.get_absolute_url())
+
+
+class VistaCambiarEstado(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Queja
+    fields = ['estado']
+    template_name = 'quejas/cambiar_estado.html'
+    context_object_name = 'queja'
+
+    def test_func(self):
+        return self.request.user.is_staff
+
+    def get_context_data(self, **kwargs):
+        contexto = super().get_context_data(**kwargs)
+        contexto['opciones_estado'] = OPCIONES_ESTADO
+        return contexto
+
+    def get_success_url(self):
+        messages.success(self.request, 'Estado actualizado correctamente.')
+        return self.object.get_absolute_url()
