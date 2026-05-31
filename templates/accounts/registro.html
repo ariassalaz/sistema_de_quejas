@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block titulo %}Crear cuenta{% endblock %}
+
+{% block contenido %}
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card shadow-sm border-0">
+      <div class="card-body p-4">
+        <h2 class="card-title text-center mb-4">
+          <i class="bi bi-person-plus text-primary me-2"></i>Crear cuenta
+        </h2>
+        <form method="post">
+          {% csrf_token %}
+          {% for campo in form %}
+            <div class="mb-3">
+              <label for="{{ campo.id_for_label }}" class="form-label fw-semibold">{{ campo.label }}</label>
+              <input type="{{ campo.field.widget.input_type }}"
+                     name="{{ campo.html_name }}"
+                     id="{{ campo.id_for_label }}"
+                     class="form-control {% if campo.errors %}is-invalid{% endif %}"
+                     placeholder="{{ campo.field.widget.attrs.placeholder|default:'' }}"
+                     {% if campo.value %}value="{{ campo.value }}"{% endif %}>
+              {% if campo.help_text %}
+                <div class="form-text text-muted">{{ campo.help_text }}</div>
+              {% endif %}
+              {% for error in campo.errors %}
+                <div class="invalid-feedback">{{ error }}</div>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <div class="d-grid mt-4">
+            <button type="submit" class="btn btn-primary btn-lg">Registrarse</button>
+          </div>
+        </form>
+        <hr>
+        <p class="text-center small mb-0">
+          ¿Ya tienes cuenta? <a href="{% url 'iniciar-sesion' %}">Iniciar sesión</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
