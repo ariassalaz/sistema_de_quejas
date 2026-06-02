@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 
 from .models import CustomUser
 
-
+# Registrar el modelo CustomUser en el admin de Django
 @admin.register(CustomUser)
 class CustomUserAdmin(UserAdmin):
     list_display = ('username', 'email', 'first_name', 'last_name', 'departamento_asignado', 'is_staff')
